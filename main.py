@@ -3,7 +3,7 @@ import asyncio
 import logging
 
 import config
-from handlers import commands, echo, menu
+from handlers import commands, echo, menu_caffee, menu_bakery,menu_tea
 
 
 
@@ -16,7 +16,11 @@ dp = Dispatcher()
 
 
 dp.include_router(commands.router)
-dp.include_router(menu.router)
+dp.include_router(menu_caffee.router)
+dp.include_router(menu_tea.router)
+dp.include_router(menu_bakery.router)
+
+# echo всегда последним
 dp.include_router(echo.router)
 
 

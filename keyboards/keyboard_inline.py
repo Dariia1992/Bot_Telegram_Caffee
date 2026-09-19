@@ -35,3 +35,20 @@ def get_confirm_keyboard():
     button_cancel = types.InlineKeyboardButton(text="❌ Cancel",callback_data="cancel")
     buttons.append([button_confirm,button_cancel])
     return types.InlineKeyboardMarkup(inline_keyboard=buttons)
+
+#tea
+def get_tea_keyboard():
+    buttons = []
+    for name, price in tea.items():
+        button = types.InlineKeyboardButton(text=f"{name} - {price} ₪",callback_data=name)
+        buttons.append([button])
+    return types.InlineKeyboardMarkup(inline_keyboard=buttons)
+
+#bakery
+def get_bakery_keyboard():
+    buttons = []
+    for name, price in bakery.items():
+        button = types.InlineKeyboardButton(text=f"{name} - {price} ₪",callback_data=name)
+        buttons.append([button])
+    return types.InlineKeyboardMarkup(inline_keyboard=buttons)
+

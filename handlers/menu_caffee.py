@@ -80,10 +80,4 @@ async def cancel_order(callback: types.CallbackQuery, state: FSMContext):
     
 
 
-@router.message(F.text == "🍵 Tea")
-async def tea_menu(message: types.Message):
-    await message.answer("🍵 Choose your tea:")
-    
-@router.message(F.text == "🥐 Bakery")
-async def bakery_menu(message: types.Message):
-    await message.answer("🥐 Choose your bakery:")
+
