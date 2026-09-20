@@ -1,5 +1,6 @@
 from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
+from aiogram.types import FSInputFile
 
 from keyboards.keyboard_inline import (
     get_coffee_keyboard,
@@ -13,6 +14,13 @@ from states.order import OrderStates
 
 router = Router()
 
+
+coffee_photos = {
+    "Espresso": "espresso.png",
+    "Americano": "americano.png",
+    "Cappuccino": "cappuccino.png",
+    "Latte": "latte.png"
+}
 
 # COFFEE MENU
 @router.message(F.text == "☕ Coffee")
@@ -38,25 +46,26 @@ async def coffee_menu(
         reply_markup=get_coffee_keyboard()
     )
 
-
-# CHOOSE COFFEE
+#coffee
 @router.callback_query(OrderStates.choosing_coffee)
 async def choose_coffee(
     callback: types.CallbackQuery,
     state: FSMContext
 ):
-    # Сохраняем выбранный кофе
-    await state.update_data(
-        product=callback.data
-    )
+    product = callback.data
 
-    # Переходим к выбору размера
+    await state.update_data(product=product)
+
     await state.set_state(
         OrderStates.choosing_coffee_size
     )
 
-    await callback.message.answer(
-        "Choose size:",
+    photo_path = coffee_photos[product]
+    photo = FSInputFile(photo_path)
+
+    await callback.message.answer_photo(
+        photo=photo,
+        caption=f"☕ {product}\nChoose size:",
         reply_markup=get_size_keyboard()
     )
 
