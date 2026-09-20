@@ -1,13 +1,15 @@
 from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
 
+
 from keyboards.keyboard_inline import (
     get_bakery_keyboard,
     get_size_keyboard,
     get_quantity_keyboard,
-    get_confirm_keyboard
+    get_confirm_keyboard,
+    
 )
-
+from keyboards.keybords_time import get_data_dates
 from states.order import OrderStates
 
 
@@ -105,14 +107,16 @@ async def confirm_order(
     callback: types.CallbackQuery,
     state: FSMContext
 ):
+    print(get_data_dates())
     await callback.message.answer(
-        "✅ Order confirmed! Thank you! 🥐"
+        "✅ Order confirmed! Thank you! 🥐",reply_markup=get_data_dates()
     )
 
     # Очищаем FSM после завершения заказа
     await state.clear()
 
     await callback.answer()
+
 
 
 # CANCEL ORDER
