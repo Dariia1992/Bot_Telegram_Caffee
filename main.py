@@ -4,6 +4,7 @@ import logging
 
 import config
 from handlers import commands, echo, menu_caffee, menu_bakery,menu_tea
+from servise import menu_data
 
 
 
@@ -19,7 +20,7 @@ dp.include_router(commands.router)
 dp.include_router(menu_caffee.router)
 dp.include_router(menu_tea.router)
 dp.include_router(menu_bakery.router)
-
+dp.include_router(menu_data.router)
 # echo всегда последним
 dp.include_router(echo.router)
 

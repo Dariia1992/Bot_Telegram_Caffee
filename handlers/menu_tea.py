@@ -14,11 +14,18 @@ from states.order import OrderStates
 router = Router()
 
 
+
 # TEA MENU
 @router.message(F.text == "🍵 Tea")
 async def tea_menu(message: types.Message, state: FSMContext):
-    # Начинаем новый заказ
-    await state.set_state(OrderStates.choosing_product)
+
+    data = await state.get_data()
+
+    if "date" not in data or "time" not in data:
+        await message.answer("📅 First choose date and time.")
+        return
+
+    await state.set_state(OrderStates.choosing_tea)
 
     await message.answer(
         "🍵 Choose your tea:",
@@ -27,7 +34,7 @@ async def tea_menu(message: types.Message, state: FSMContext):
 
 
 # CHOOSE TEA
-@router.callback_query(OrderStates.choosing_product)
+@router.callback_query(OrderStates.choosing_tea)
 async def choose_tea(
     callback: types.CallbackQuery,
     state: FSMContext
@@ -36,7 +43,7 @@ async def choose_tea(
     await state.update_data(product=callback.data)
 
     # Переходим к выбору размера
-    await state.set_state(OrderStates.choosing_size)
+    await state.set_state(OrderStates.choosing_tea_size)
 
     await callback.message.answer(
         "Choose size:",
@@ -47,7 +54,7 @@ async def choose_tea(
 
 
 # CHOOSE SIZE
-@router.callback_query(OrderStates.choosing_size)
+@router.callback_query(OrderStates.choosing_tea_size)
 async def choose_size(
     callback: types.CallbackQuery,
     state: FSMContext
@@ -56,7 +63,7 @@ async def choose_size(
     await state.update_data(size=callback.data)
 
     # Переходим к количеству
-    await state.set_state(OrderStates.choosing_quantity)
+    await state.set_state(OrderStates.choosing_tea_quantity)
 
     await callback.message.answer(
         "Choose quantity:",
@@ -67,7 +74,7 @@ async def choose_size(
 
 
 # CHOOSE QUANTITY
-@router.callback_query(OrderStates.choosing_quantity)
+@router.callback_query(OrderStates.choosing_tea_quantity)
 async def choose_quantity(
     callback: types.CallbackQuery,
     state: FSMContext
@@ -81,12 +88,16 @@ async def choose_quantity(
     # Получаем данные заказа
     data = await state.get_data()
 
+    date = data["date"]
+    time = data["time"]
     product = data["product"]
     size = data["size"]
     quantity = data["quantity"]
 
     await callback.message.answer(
         f"🍵 Your order:\n"
+        f"📅 Date: {date}\n"
+        f"🕐 Time: {time}\n"
         f"Tea: {product}\n"
         f"Size: {size}\n"
         f"Quantity: {quantity}",

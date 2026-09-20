@@ -9,18 +9,23 @@ from keyboards.keyboard_inline import (
     get_confirm_keyboard,
     
 )
-from keyboards.keybords_time import get_data_dates
+
 from states.order import OrderStates
 
 
 router = Router()
 
 
-# BAKERY MENU
 @router.message(F.text == "🥐 Bakery")
 async def bakery_menu(message: types.Message, state: FSMContext):
-    # Начинаем новый заказ
-    await state.set_state(OrderStates.choosing_product)
+
+    data = await state.get_data()
+
+    if "date" not in data or "time" not in data:
+        await message.answer("📅 First choose date and time.")
+        return
+
+    await state.set_state(OrderStates.choosing_bakery)
 
     await message.answer(
         "🥐 Choose your bakery:",
@@ -29,7 +34,7 @@ async def bakery_menu(message: types.Message, state: FSMContext):
 
 
 # CHOOSE BAKERY
-@router.callback_query(OrderStates.choosing_product)
+@router.callback_query(OrderStates.choosing_bakery)
 async def choose_bakery(
     callback: types.CallbackQuery,
     state: FSMContext
@@ -38,7 +43,7 @@ async def choose_bakery(
     await state.update_data(product=callback.data)
 
     # Переходим к выбору размера
-    await state.set_state(OrderStates.choosing_size)
+    await state.set_state(OrderStates.choosing_bakery_size)
 
     await callback.message.answer(
         "Choose size:",
@@ -49,7 +54,7 @@ async def choose_bakery(
 
 
 # CHOOSE SIZE
-@router.callback_query(OrderStates.choosing_size)
+@router.callback_query(OrderStates.choosing_bakery_size)
 async def choose_size(
     callback: types.CallbackQuery,
     state: FSMContext
@@ -58,7 +63,7 @@ async def choose_size(
     await state.update_data(size=callback.data)
 
     # Переходим к количеству
-    await state.set_state(OrderStates.choosing_quantity)
+    await state.set_state(OrderStates.choosing_bakery_quantity)
 
     await callback.message.answer(
         "Choose quantity:",
@@ -68,27 +73,27 @@ async def choose_size(
     await callback.answer()
 
 
-# CHOOSE QUANTITY
-@router.callback_query(OrderStates.choosing_quantity)
+@router.callback_query(OrderStates.choosing_bakery_quantity)
 async def choose_quantity(
     callback: types.CallbackQuery,
     state: FSMContext
 ):
-    # Сохраняем количество
     await state.update_data(quantity=callback.data)
 
-    # Переходим к подтверждению
     await state.set_state(OrderStates.confirming_order)
 
-    # Получаем весь заказ из FSM
     data = await state.get_data()
 
+    date = data["date"]
+    time = data["time"]
     product = data["product"]
     size = data["size"]
     quantity = data["quantity"]
 
     await callback.message.answer(
         f"🥐 Your order:\n"
+        f"📅 Date: {date}\n"
+        f"🕐 Time: {time}\n"
         f"Bakery: {product}\n"
         f"Size: {size}\n"
         f"Quantity: {quantity}",
@@ -107,9 +112,9 @@ async def confirm_order(
     callback: types.CallbackQuery,
     state: FSMContext
 ):
-    print(get_data_dates())
+    
     await callback.message.answer(
-        "✅ Order confirmed! Thank you! 🥐",reply_markup=get_data_dates()
+        "✅ Order confirmed! Thank you! 🥐"
     )
 
     # Очищаем FSM после завершения заказа

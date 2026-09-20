@@ -1,5 +1,5 @@
 from data import work_time
-from datetime import date, timedelta
+from datetime import date, timedelta,datetime
 from aiogram import types
 
 
@@ -18,3 +18,34 @@ def get_data_dates():
         
     return types.InlineKeyboardMarkup(inline_keyboard=buttons)
     
+
+def get_time_keyboard():
+    buttons = []
+
+    start_time = datetime.strptime(
+        work_time.work_start_time,
+        "%H:%M"
+    )
+
+    end_time = datetime.strptime(
+        work_time.work_end_time,
+        "%H:%M"
+    )
+
+    current_time = start_time
+
+    while current_time < end_time:
+        time_text = current_time.strftime("%H:%M")
+
+        button = types.InlineKeyboardButton(
+            text=time_text,
+            callback_data=f"time:{time_text}"
+        )
+
+        buttons.append([button])
+
+        current_time += timedelta(minutes=30)
+
+    return types.InlineKeyboardMarkup(
+        inline_keyboard=buttons
+    )
